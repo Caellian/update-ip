@@ -1,0 +1,5 @@
+CLOUDFLARE_API_TOKEN=your-token
+CLOUDFLARE_ZONE_ID=your-zone-id
+DNS_RECORD_NAME=pc.example.com
+
+*/5 * * * * update-ip /usr/local/bin/update-ip

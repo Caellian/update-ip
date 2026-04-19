@@ -1,0 +1,19 @@
+[package]
+name = "update-ip"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = ["resolver-opendns", "provider-cloudflare"]
+
+resolver-opendns = []
+
+provider-cloudflare = []
+
+[dependencies]
+native-tls = "0.2"
+
+[profile.release]
+lto = true
+strip = true
+panic = "abort"

@@ -1,0 +1,10 @@
+#!/sbin/openrc-run
+
+name="update-ip"
+description="Update dynamic DNS"
+command="/usr/local/bin/update-ip"
+command_user="update-ip:update-ip"
+
+depend() {
+	need net
+}
