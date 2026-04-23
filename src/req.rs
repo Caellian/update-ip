@@ -14,7 +14,7 @@ fn request(method: &str, host: &str, path: &str, headers: &[(&str, &str)], body:
     let connector = TlsConnector::new().ok()?;
     let mut stream = connector.connect(host, tcp).ok()?;
 
-    let mut req = format!("{method} {path} HTTP/1.1\r\nHost: {host}\r\nConnection: close\r\n");
+    let mut req = format!("{method} {path} HTTP/1.0\r\nHost: {host}\r\n");
     for (k, v) in headers {
         req.push_str(k);
         req.push_str(": ");
