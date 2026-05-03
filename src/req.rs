@@ -2,15 +2,20 @@
 
 use native_tls::TlsConnector;
 use std::io::{Read, Write};
-use std::net::TcpStream;
+use std::net::{TcpStream, ToSocketAddrs};
+use std::time::Duration;
 
 pub struct Response {
     pub status: u16,
     pub body: String,
 }
 
+const TIMEOUT: Duration = Duration::from_secs(10);
+
 fn request(method: &str, host: &str, path: &str, headers: &[(&str, &str)], body: Option<&str>) -> Option<Response> {
-    let tcp = TcpStream::connect((host, 443)).ok()?;
+    let addr = (host, 443).to_socket_addrs().ok()?.next()?;
+    let tcp = TcpStream::connect_timeout(&addr, TIMEOUT).ok()?;
+    tcp.set_read_timeout(Some(TIMEOUT)).ok()?;
     let connector = TlsConnector::new().ok()?;
     let mut stream = connector.connect(host, tcp).ok()?;
 
