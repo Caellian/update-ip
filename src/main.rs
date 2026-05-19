@@ -8,7 +8,6 @@ mod resolver;
 mod ssl;
 mod addr;
 
-
 fn main() {
     use std::io::Write;
     let mut stderr = std::io::stderr();
@@ -118,18 +117,18 @@ pub mod util {
         match std::env::var(var) {
             Ok(it) => return it,
             Err(std::env::VarError::NotPresent) => {
-              let mut stderr = std::io::stderr();
-              let _ = stderr.write_all(b"missing '");
-              let _ = stderr.write_all(var.as_bytes());
-              let _ = stderr.write_all(b"' environment variable");
-              let _ = stderr.flush();
+              cat_stderr(&[
+                b"missing '",
+                var.as_bytes(),
+                b"' environment variable"
+              ]);
             }
             Err(std::env::VarError::NotUnicode(_)) => {
-              let mut stderr = std::io::stderr();
-              let _ = stderr.write_all(b"'");
-              let _ = stderr.write_all(var.as_bytes());
-              let _ = stderr.write_all(b"' environment variable value is not unicode");
-              let _ = stderr.flush();
+              cat_stderr(&[
+                b"'",
+                var.as_bytes(),
+                b"' environment variable value is not unicode"
+              ]);
             },
         }
         std::process::exit(1);
