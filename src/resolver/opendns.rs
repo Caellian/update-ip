@@ -2,6 +2,8 @@ use std::io::Result;
 use std::net::{Ipv4Addr, Ipv6Addr, UdpSocket};
 use std::time::Duration;
 
+use crate::addr::*;
+
 pub struct OpenDNS;
 
 // resolver1.opendns.com
@@ -77,8 +79,8 @@ impl OpenDNS {
     }
 }
 
-impl super::ResolvePublicAddress<Ipv4Addr> for OpenDNS {
-    fn public_address(&self) -> Result<Ipv4Addr> {
+impl super::ResolvePublicAddress<Ipv4Address> for OpenDNS {
+    fn public_address(&self) -> Result<Ipv4Address> {
         let query = OpenDNS::build_query(1);
         let sock = UdpSocket::bind((Ipv4Addr::UNSPECIFIED, 0))?;
         sock.set_read_timeout(Some(Duration::from_secs(5)))?;
@@ -88,12 +90,12 @@ impl super::ResolvePublicAddress<Ipv4Addr> for OpenDNS {
         let len = sock.recv(&mut buf)?;
         let octets = OpenDNS::parse_rdata(&buf, len)?;
         let octets: [u8; 4] = octets.try_into().map_err(invalid_data)?;
-        Ok(Ipv4Addr::from_octets(octets))
+        Ok(Ipv4Address(octets))
     }
 }
 
-impl super::ResolvePublicAddress<Ipv6Addr> for OpenDNS {
-    fn public_address(&self) -> Result<Ipv6Addr> {
+impl super::ResolvePublicAddress<Ipv6Address> for OpenDNS {
+    fn public_address(&self) -> Result<Ipv6Address> {
         let query = OpenDNS::build_query(28);
         let sock = UdpSocket::bind((Ipv6Addr::UNSPECIFIED, 0))?;
         sock.set_read_timeout(Some(Duration::from_secs(5)))?;
@@ -103,7 +105,7 @@ impl super::ResolvePublicAddress<Ipv6Addr> for OpenDNS {
         let len = sock.recv(&mut buf)?;
         let octets = OpenDNS::parse_rdata(&buf, len)?;
         let octets: [u8; 16] = octets.try_into().map_err(invalid_data)?;
-        Ok(Ipv6Addr::from_octets(octets))
+        Ok(Ipv6Address(octets))
     }
 }
 

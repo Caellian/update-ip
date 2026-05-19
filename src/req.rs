@@ -1,6 +1,7 @@
 //! Minimal HTTPS client. Raw OpenSSL FFI over std TCP.
 
 use crate::ssl::SslStream;
+use crate::util::*;
 use std::io::{Read, Write};
 use std::net::{TcpStream, ToSocketAddrs};
 use std::time::Duration;
@@ -18,7 +19,7 @@ fn request(method: &str, host: &str, path: &str, headers: &[(&str, &str)], body:
     tcp.set_read_timeout(Some(TIMEOUT)).ok()?;
     let mut stream = SslStream::connect(host, tcp)?;
 
-    let mut req = format!("{method} {path} HTTP/1.0\r\nHost: {host}\r\n");
+    let mut req = cat(&[method, " ", path, " HTTP/1.0\r\nHost: ", host, "\r\n"]);
     for (k, v) in headers {
         req.push_str(k);
         req.push_str(": ");
@@ -26,7 +27,11 @@ fn request(method: &str, host: &str, path: &str, headers: &[(&str, &str)], body:
         req.push_str("\r\n");
     }
     if let Some(body) = body {
-        req.push_str(&format!("Content-Length: {}\r\n", body.len()));
+        let mut len_buf = [0u8; 20];
+        let len_str = usize_to_str(body.len(), &mut len_buf);
+        req.push_str("Content-Length: ");
+        req.push_str(len_str);
+        req.push_str("\r\n");
     }
     req.push_str("\r\n");
     if let Some(body) = body {
@@ -40,7 +45,7 @@ fn request(method: &str, host: &str, path: &str, headers: &[(&str, &str)], body:
     let raw = String::from_utf8_lossy(&buf);
 
     let status_line = raw.lines().next()?;
-    let status: u16 = status_line.split(' ').nth(1)?.parse().ok()?;
+    let status = parse_u16(status_line.split(' ').nth(1)?)?;
 
     let body = raw.split_once("\r\n\r\n").map(|(_, b)| b.to_string()).unwrap_or_default();
 

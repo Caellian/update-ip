@@ -3,7 +3,7 @@
 //! Implementations determine the machine's public IP by any means (DNS, HTTP,
 //! STUN, etc.) and return it as a standard address type.
 
-use crate::Address;
+use crate::addr::*;
 
 #[cfg(feature = "resolver-opendns")]
 mod opendns;
@@ -19,7 +19,7 @@ pub trait ResolvePublicAddress<A: Address> {
 }
 
 pub trait Resolver:
-    ResolvePublicAddress<std::net::Ipv4Addr> + ResolvePublicAddress<std::net::Ipv6Addr> + Sized
+    ResolvePublicAddress<Ipv4Address> + ResolvePublicAddress<Ipv6Address> + Sized
 {
     fn new() -> Self;
 }

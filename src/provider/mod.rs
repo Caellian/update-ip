@@ -2,7 +2,8 @@
 //!
 //! Implementations create and update DNS records (A/AAAA) via a provider's API.
 
-use crate::Address;
+use crate::addr::{Address, Ipv4Address, Ipv6Address};
+use crate::util::{cat_stderr, write_cat};
 
 #[cfg(feature = "provider-cloudflare")]
 mod cloudflare;
@@ -21,19 +22,24 @@ pub trait HandleRecord<A: Address> {
     fn create_dns_record(&self, record_name: &str, ip: A) -> bool;
 
     fn upsert_record(&self, record_name: &str, ip: A) {
+        let mut stderr = std::io::stderr();
         match HandleRecord::<A>::get_record_id(self, record_name) {
             Some(record_id) => {
                 if self.update_dns_record(record_id, record_name, ip) {
-                    eprintln!("Updated {} record to {ip}.", A::RECORD_TYPE);
+                    let _ = write_cat(&mut stderr, &[b"Updated ", A::RECORD_TYPE.as_bytes(), b" record to "]);
+                    let _ = ip.write_str(&mut stderr);
+                    let _ = write_cat(&mut stderr, &[b".\n"]);
                 } else {
-                    eprintln!("Failed to update {} record.", A::RECORD_TYPE);
+                    let _ = cat_stderr(&[b"Failed to update ", A::RECORD_TYPE.as_bytes(), b" record.\n"]);
                 }
             }
             None => {
                 if self.create_dns_record(record_name, ip) {
-                    eprintln!("Created {} record for {ip}.", A::RECORD_TYPE);
+                    let _ = write_cat(&mut stderr, &[b"Created ", A::RECORD_TYPE.as_bytes(), b" record with "]);
+                    let _ = ip.write_str(&mut stderr);
+                    let _ = write_cat(&mut stderr, &[b".\n"]);
                 } else {
-                    eprintln!("Failed to create {} record.", A::RECORD_TYPE);
+                    let _ = cat_stderr(&[b"Failed to create ", A::RECORD_TYPE.as_bytes(), b" record.\n"]);
                 }
             }
         }
@@ -41,7 +47,7 @@ pub trait HandleRecord<A: Address> {
 }
 
 pub trait DnsProvider:
-    HandleRecord<std::net::Ipv4Addr> + HandleRecord<std::net::Ipv6Addr> + Sized
+    HandleRecord<Ipv4Address> + HandleRecord<Ipv6Address> + Sized
 {
     fn new() -> Self;
 }
