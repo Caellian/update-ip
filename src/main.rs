@@ -4,6 +4,7 @@ use crate::resolver::*;
 mod provider;
 mod req;
 mod resolver;
+mod ssl;
 
 pub trait Address: std::fmt::Display + Copy {
     const RECORD_TYPE: &'static str;

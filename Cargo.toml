@@ -10,9 +10,6 @@ resolver-opendns = []
 
 provider-cloudflare = []
 
-[dependencies]
-native-tls = "0.2"
-
 [profile.release]
 lto = true
 strip = true

@@ -1,6 +1,6 @@
-//! Minimal HTTPS client. Writes raw HTTP/1.1 over a `native-tls` TLS stream.
+//! Minimal HTTPS client. Raw OpenSSL FFI over std TCP.
 
-use native_tls::TlsConnector;
+use crate::ssl::SslStream;
 use std::io::{Read, Write};
 use std::net::{TcpStream, ToSocketAddrs};
 use std::time::Duration;
@@ -16,8 +16,7 @@ fn request(method: &str, host: &str, path: &str, headers: &[(&str, &str)], body:
     let addr = (host, 443).to_socket_addrs().ok()?.next()?;
     let tcp = TcpStream::connect_timeout(&addr, TIMEOUT).ok()?;
     tcp.set_read_timeout(Some(TIMEOUT)).ok()?;
-    let connector = TlsConnector::new().ok()?;
-    let mut stream = connector.connect(host, tcp).ok()?;
+    let mut stream = SslStream::connect(host, tcp)?;
 
     let mut req = format!("{method} {path} HTTP/1.0\r\nHost: {host}\r\n");
     for (k, v) in headers {
