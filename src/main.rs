@@ -31,7 +31,7 @@ pub fn env<K: AsRef<std::ffi::OsStr> + ?Sized>(var: &'static K) -> String {
 }
 
 fn main() {
-    let record_name = env("DNS_RECORD_NAME");
+    let record_names = env("DNS_RECORD_NAME");
     let resolver = resolver::Default::new();
     let provider = provider::Default::new();
 
@@ -57,10 +57,12 @@ fn main() {
         std::process::exit(1);
     }
 
-    if let Some(ip) = ipv4 {
-        provider.upsert_record(&record_name, ip);
-    }
-    if let Some(ip) = ipv6 {
-        provider.upsert_record(&record_name, ip);
+    for record_name in record_names.split(';').filter(|s| !s.is_empty()) {
+        if let Some(ip) = ipv4 {
+            provider.upsert_record(record_name, ip);
+        }
+        if let Some(ip) = ipv6 {
+            provider.upsert_record(record_name, ip);
+        }
     }
 }
