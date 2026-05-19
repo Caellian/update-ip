@@ -3,14 +3,15 @@ default:
 
 bin := "update-ip"
 service_user := "update-ip"
+target := "x86_64-unknown-linux-gnu"
 
 build *args:
-    cargo build --release {{args}}
+    cargo +nightly build --release --target {{target}} {{args}}
 
 install-systemd *args: (build args)
     #!/bin/sh
     sudo useradd --system --no-create-home --shell /usr/sbin/nologin {{service_user}} || true
-    sudo install -m 755 target/release/{{bin}} /usr/local/bin/{{bin}}
+    sudo install -m 755 target/{{target}}/release/{{bin}} /usr/local/bin/{{bin}}
     sudo install -m 644 dist/systemd/{{bin}}.service /etc/systemd/system/
     sudo install -m 644 dist/systemd/{{bin}}.timer /etc/systemd/system/
     sudo systemctl daemon-reload
@@ -20,7 +21,7 @@ install-systemd *args: (build args)
 install-openrc *args: (build args)
     #!/bin/sh
     sudo useradd --system --no-create-home --shell /usr/sbin/nologin {{service_user}} || true
-    sudo install -m 755 target/release/{{bin}} /usr/local/bin/{{bin}}
+    sudo install -m 755 target/{{target}}/release/{{bin}} /usr/local/bin/{{bin}}
     sudo install -m 755 dist/openrc/{{bin}} /etc/init.d/{{bin}}
     sudo install -m 644 dist/openrc/{{bin}}.conf /etc/conf.d/{{bin}}
     echo "Edit /etc/conf.d/{{bin}} with your environment variables, then run:"
@@ -31,7 +32,7 @@ install-openrc *args: (build args)
 install-runit *args: (build args)
     #!/bin/sh
     sudo useradd --system --no-create-home --shell /usr/sbin/nologin {{service_user}} || true
-    sudo install -m 755 target/release/{{bin}} /usr/local/bin/{{bin}}
+    sudo install -m 755 target/{{target}}/release/{{bin}} /usr/local/bin/{{bin}}
     echo "Edit dist/crontab with your environment variables, then install:"
     echo "  sudo crontab -u {{service_user}} dist/crontab"
 

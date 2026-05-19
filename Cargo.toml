@@ -1,3 +1,5 @@
+cargo-features = ["panic-immediate-abort"]
+
 [package]
 name = "update-ip"
 version = "0.1.0"
@@ -13,5 +15,5 @@ provider-cloudflare = []
 [profile.release]
 lto = true
 strip = true
-panic = "abort"
+panic = "immediate-abort"
 codegen-units = 1

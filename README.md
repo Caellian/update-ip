@@ -45,11 +45,11 @@ one for your system.
 ## Building
 
 ```sh
-cargo build --release
+cargo +nightly build --release --target x86_64-unknown-linux-gnu
 ```
 
-The release binary is ~380K with LTO, stripping, and `panic = "abort"` enabled.
-TLS is provided by the system's OpenSSL via `native-tls`.
+The release binary is ~64K with LTO, stripping, and `panic = "immediate-abort"` enabled.
+TLS is provided by the system's OpenSSL.
 
 ## License
 
